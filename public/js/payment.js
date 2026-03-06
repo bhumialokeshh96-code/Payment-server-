@@ -78,16 +78,19 @@ function validate(data) {
 // ── Cashfree redirect flow ───────────────────────────────────────────────────
 
 function redirectToCashfree(paymentSessionId) {
-  // Cashfree JS SDK is loaded from CDN.
-  // The global `Cashfree` is a constructor function in SDK v3.
-  if (typeof window !== 'undefined' && typeof window.Cashfree !== 'undefined') {
-    const cashfree = window.Cashfree({ mode: 'sandbox' });
+  console.log('Initializing Cashfree checkout with session:', paymentSessionId);
+
+  if (typeof window === 'undefined' || typeof window.Cashfree === 'undefined') {
+    console.error('Cashfree SDK not loaded. Ensure the SDK script is included before payment.js.');
+    throw new Error('Payment gateway unavailable. Please refresh the page and try again.');
+  }
+
+  try {
+    const cashfree = new window.Cashfree({ mode: 'sandbox' });
     cashfree.checkout({ paymentSessionId });
-  } else {
-    // Fallback: redirect to Cashfree hosted checkout URL
-    const checkoutUrl =
-      'https://payments-test.cashfree.com/order/#' + paymentSessionId;
-    window.location.href = checkoutUrl;
+  } catch (err) {
+    console.error('Cashfree SDK initialization failed:', err);
+    throw new Error('Failed to initialize payment. Please try again.');
   }
 }
 

@@ -35,6 +35,16 @@ const createOrder = async (req, res, next) => {
     };
 
     const cashfreeResponse = await cashfreeService.createCashfreeOrder(cashfreePayload);
+    logger.info('Cashfree order created', {
+      order_id: cashfreeResponse.order_id,
+      payment_session_id: cashfreeResponse.payment_session_id,
+      order_status: cashfreeResponse.order_status,
+    });
+
+    if (!cashfreeResponse.payment_session_id) {
+      logger.error('Cashfree response missing payment_session_id', cashfreeResponse);
+      throw new Error('Failed to obtain payment session from Cashfree');
+    }
 
     const order = new Order({
       orderId,
