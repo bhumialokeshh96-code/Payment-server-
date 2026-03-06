@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Payment Failed</title>
+  <link rel="stylesheet" href="/css/styles.css" />
+</head>
+<body>
+  <div class="container">
+    <header class="page-header">
+      <h1>💳 Cashfree Payment Gateway</h1>
+    </header>
+
+    <main>
+      <section class="card text-center" id="failureSection">
+        <div class="success-icon">❌</div>
+        <h2>Payment Failed</h2>
+        <p class="subtitle">We were unable to process your payment. Please try again.</p>
+        <div id="orderDetails" class="order-details"></div>
+        <a href="/" class="btn btn-primary mt-2">Retry Payment</a>
+        <p class="mt-2" style="font-size:0.9rem;color:#666;">
+          Need help? Contact us at
+          <a href="mailto:support@example.com">support@example.com</a>
+        </p>
+      </section>
+    </main>
+
+    <footer class="page-footer">
+      <p>🔒 Your payment is secured by 256-bit SSL encryption</p>
+    </footer>
+  </div>
+
+  <script>
+    (function () {
+      var params = new URLSearchParams(window.location.search);
+      var orderId = params.get('order_id');
+      var reason = params.get('reason');
+      var el = document.getElementById('orderDetails');
+      if (orderId || reason) {
+        if (orderId) {
+          var orderRow = document.createElement('p');
+          var orderLabel = document.createElement('strong');
+          orderLabel.textContent = 'Order ID: ';
+          orderRow.appendChild(orderLabel);
+          orderRow.appendChild(document.createTextNode(orderId));
+          el.appendChild(orderRow);
+        }
+        if (reason) {
+          var reasonRow = document.createElement('p');
+          var reasonLabel = document.createElement('strong');
+          reasonLabel.textContent = 'Reason: ';
+          reasonRow.appendChild(reasonLabel);
+          reasonRow.appendChild(document.createTextNode(reason));
+          el.appendChild(reasonRow);
+        }
+      }
+    })();
+  </script>
+</body>
+</html>
