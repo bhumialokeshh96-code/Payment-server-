@@ -7,6 +7,7 @@ const path = require('path');
 const connectDB = require('./config/database');
 const logger = require('./config/logger');
 const errorHandler = require('./middleware/errorHandler');
+const { cashfreeConfig } = require('./config/cashfree');
 const orderRoutes = require('./routes/orders');
 const paymentRoutes = require('./routes/payments');
 
@@ -15,7 +16,7 @@ const PORT = process.env.PORT || 3000;
 
 // ─── CORS ────────────────────────────────────────────────────────────────────
 const allowedOrigins = process.env.ALLOWED_ORIGINS
-  ? process.env.ALLOWED_ORIGINS.split(',')
+  ? process.env.ALLOWED_ORIGINS.split(',').map(origin => origin.trim())
   : ['https://payment-server-s6l2.onrender.com'];
 
 app.use(
@@ -59,6 +60,12 @@ app.use(errorHandler);
 
 // ─── Start server ────────────────────────────────────────────────────────────
 if (require.main === module) {
+  logger.info('Cashfree Configuration Loaded', {
+    appId: cashfreeConfig.appId ? '***' : 'NOT SET ❌',
+    secretKey: cashfreeConfig.secretKey ? '***' : 'NOT SET ❌',
+    apiUrl: cashfreeConfig.apiUrl,
+    nodeEnv: process.env.NODE_ENV,
+  });
   connectDB().then(() => {
     app.listen(PORT, () => {
       logger.info(`Payment server running on port ${PORT}`);
