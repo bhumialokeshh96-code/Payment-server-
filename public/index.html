@@ -3,75 +3,46 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Payment Gateway – Create Order</title>
+  <title>Payment Gateway – Quick Pay</title>
   <link rel="stylesheet" href="/css/styles.css" />
   <script src="https://sdk.cashfree.com/js/v3/cashfree.js"></script>
 </head>
 <body>
   <div class="container">
     <header class="page-header">
-      <h1>💳 Cashfree Payment Gateway</h1>
-      <p class="subtitle">Secure payments powered by Cashfree</p>
+      <h1>💳 Quick Payment</h1>
+      <p class="subtitle">Fast and secure payments</p>
     </header>
 
     <main>
-      <section class="card" id="orderFormSection">
-        <h2>Create Payment Order</h2>
-        <form id="orderForm" novalidate>
+      <section class="card" id="paymentFormSection">
+        <h2>Make Payment</h2>
+        <form id="paymentForm" novalidate>
+          
           <div class="form-group">
-            <label for="customerName">Full Name <span class="required">*</span></label>
-            <input
-              type="text"
-              id="customerName"
-              name="customerName"
-              placeholder="John Doe"
-              required
-              maxlength="100"
-              autocomplete="name"
-            />
-            <span class="error-msg" id="nameError"></span>
-          </div>
-
-          <div class="form-group">
-            <label for="customerEmail">Email Address <span class="required">*</span></label>
-            <input
-              type="email"
-              id="customerEmail"
-              name="customerEmail"
-              placeholder="john@example.com"
-              required
-              autocomplete="email"
-            />
-            <span class="error-msg" id="emailError"></span>
-          </div>
-
-          <div class="form-group">
-            <label for="customerPhone">Phone Number <span class="required">*</span></label>
+            <label for="mobileNumber">Mobile Number <span class="required">*</span></label>
             <input
               type="tel"
-              id="customerPhone"
-              name="customerPhone"
-              placeholder="+919876543210"
+              id="mobileNumber"
+              name="mobileNumber"
+              placeholder="Enter 10-digit number"
               required
+              pattern="[0-9]{10}"
+              maxlength="10"
               autocomplete="tel"
             />
-            <span class="error-msg" id="phoneError"></span>
+            <span class="error-msg" id="mobileError"></span>
           </div>
 
           <div class="form-group">
-            <label for="amount">Amount (INR) <span class="required">*</span></label>
-            <div class="input-prefix-wrap">
-              <span class="input-prefix">₹</span>
-              <input
-                type="number"
-                id="amount"
-                name="amount"
-                placeholder="500"
-                min="1"
-                step="0.01"
-                required
-              />
+            <label for="amount">Select Amount <span class="required">*</span></label>
+            <div class="amount-buttons">
+              <button type="button" class="amount-btn" data-amount="600">₹600</button>
+              <button type="button" class="amount-btn" data-amount="1200">₹1200</button>
+              <button type="button" class="amount-btn" data-amount="1600">₹1600</button>
+              <button type="button" class="amount-btn" data-amount="2000">₹2000</button>
             </div>
+            <input type="hidden" id="amount" name="amount" required />
             <span class="error-msg" id="amountError"></span>
           </div>
 
