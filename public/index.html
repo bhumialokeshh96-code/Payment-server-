@@ -2,99 +2,637 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Payment Gateway – Create Order</title>
-  <link rel="stylesheet" href="/css/styles.css" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>HA Payment Gateway – Select Amount</title>
+  <!-- Cashfree JS SDK v3 -->
   <script src="https://sdk.cashfree.com/js/v3/cashfree.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: system-ui, 'Segoe UI', 'Inter', -apple-system, BlinkMacSystemFont, 'Roboto', sans-serif;
+    }
+    body {
+      background: linear-gradient(145deg, #f0f4fa 0%, #e2e8f0 100%);
+      min-height: 100vh;
+      padding: 1.5rem 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .container {
+      max-width: 560px;
+      width: 100%;
+      margin: 0 auto;
+      background: white;
+      border-radius: 2rem;
+      box-shadow: 0 25px 45px -12px rgba(0,0,0,0.3), 0 2px 8px rgba(0,0,0,0.05);
+      overflow: hidden;
+    }
+    .page-header {
+      background: linear-gradient(135deg, #0a2b3b 0%, #144d5e 100%);
+      padding: 1.8rem 1.5rem;
+      color: white;
+      text-align: center;
+    }
+    .page-header h1 {
+      font-size: 1.8rem;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+      margin-bottom: 0.4rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    .subtitle {
+      opacity: 0.9;
+      font-size: 0.85rem;
+      font-weight: 400;
+    }
+    main {
+      padding: 1.8rem 1.5rem 1.5rem;
+    }
+    .card {
+      background: #fff;
+      border-radius: 1.5rem;
+    }
+    .card h2 {
+      font-size: 1.4rem;
+      font-weight: 600;
+      margin-bottom: 1.5rem;
+      color: #0a2b3b;
+      border-left: 5px solid #1f7b8c;
+      padding-left: 1rem;
+    }
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+    label {
+      font-weight: 600;
+      display: block;
+      margin-bottom: 0.5rem;
+      color: #1e3a4d;
+      font-size: 0.9rem;
+    }
+    .required {
+      color: #e03a3a;
+      margin-left: 3px;
+    }
+    input {
+      width: 100%;
+      padding: 0.85rem 1rem;
+      border: 1.5px solid #e2edf2;
+      border-radius: 1rem;
+      font-size: 1rem;
+      background-color: #fefefe;
+      transition: 0.2s;
+      outline: none;
+    }
+    input:focus {
+      border-color: #1f7b8c;
+      box-shadow: 0 0 0 3px rgba(31,123,140,0.2);
+    }
+    /* Amount selection grid */
+    .amount-selector {
+      margin-top: 0.3rem;
+    }
+    .amount-options {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin-top: 8px;
+    }
+    .amount-option {
+      position: relative;
+      cursor: pointer;
+    }
+    .amount-option input {
+      position: absolute;
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    .amount-card {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #f8fafc;
+      border: 2px solid #e2edf2;
+      border-radius: 1rem;
+      padding: 0.9rem 0.5rem;
+      font-weight: 700;
+      font-size: 1.2rem;
+      transition: all 0.2s;
+      cursor: pointer;
+      color: #1e3a4d;
+    }
+    .amount-option input:checked + .amount-card {
+      background: #e0f2fe;
+      border-color: #1f7b8c;
+      color: #0f5b6e;
+      box-shadow: 0 2px 8px rgba(31,123,140,0.2);
+      transform: scale(0.98);
+    }
+    .amount-card:hover {
+      background: #eef2f8;
+      border-color: #b9d4e0;
+    }
+    .error-msg {
+      font-size: 0.75rem;
+      color: #e53e3e;
+      margin-top: 5px;
+      display: block;
+      min-height: 18px;
+    }
+    .alert {
+      padding: 0.85rem 1rem;
+      border-radius: 1rem;
+      margin: 1rem 0 1.2rem;
+      font-size: 0.85rem;
+    }
+    .alert-error {
+      background-color: #fee2e2;
+      border-left: 4px solid #dc2626;
+      color: #991b1b;
+    }
+    .hidden {
+      display: none;
+    }
+    .btn {
+      width: 100%;
+      padding: 0.9rem 1rem;
+      font-size: 1rem;
+      font-weight: 600;
+      border: none;
+      border-radius: 2rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      background: #1e6f5c;
+      color: white;
+      margin-top: 0.8rem;
+    }
+    .btn-primary {
+      background: linear-gradient(95deg, #136b7c 0%, #1f8a9c 100%);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+    .btn-primary:hover {
+      background: linear-gradient(95deg, #0f5a6a 0%, #197a8c 100%);
+      transform: translateY(-1px);
+    }
+    .spinner {
+      width: 20px;
+      height: 20px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-radius: 50%;
+      border-top-color: white;
+      animation: spin 0.7s linear infinite;
+      display: inline-block;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    .status-content {
+      background: #f8fafc;
+      border-radius: 1.2rem;
+      padding: 1.4rem;
+      border: 1px solid #e2edf2;
+      word-break: break-word;
+    }
+    .page-footer {
+      background: #f1f5f9;
+      text-align: center;
+      padding: 1rem;
+      font-size: 0.7rem;
+      color: #475569;
+      border-top: 1px solid #e2e8f0;
+    }
+    @media (max-width: 480px) {
+      main { padding: 1.3rem; }
+      .page-header h1 { font-size: 1.5rem; }
+      .amount-options {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+      }
+    }
+    .badge-payment {
+      display: inline-block;
+      background: #e9f5f0;
+      padding: 5px 12px;
+      border-radius: 40px;
+      font-size: 0.75rem;
+      margin-top: 8px;
+    }
+    button:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+    }
+  </style>
 </head>
 <body>
-  <div class="container">
-    <header class="page-header">
-      <h1>💳 Cashfree Payment Gateway</h1>
-      <p class="subtitle">Secure payments powered by Cashfree</p>
-    </header>
+<div class="container">
+  <header class="page-header">
+    <h1>💳 HA Payment Gateway</h1>
+    <p class="subtitle">Select amount & pay securely via Cashfree</p>
+  </header>
 
-    <main>
-      <section class="card" id="orderFormSection">
-        <h2>Create Payment Order</h2>
-        <form id="orderForm" novalidate>
-          <div class="form-group">
-            <label for="customerName">Full Name <span class="required">*</span></label>
-            <input
-              type="text"
-              id="customerName"
-              name="customerName"
-              placeholder="John Doe"
-              required
-              maxlength="100"
-              autocomplete="name"
-            />
-            <span class="error-msg" id="nameError"></span>
-          </div>
+  <main>
+    <!-- Order creation section -->
+    <section class="card" id="orderFormSection">
+      <h2>🔐 Complete Payment</h2>
+      <form id="orderForm" novalidate>
+        <div class="form-group">
+          <label for="customerName">Full Name <span class="required">*</span></label>
+          <input type="text" id="customerName" name="customerName" placeholder="Rahul Sharma" required maxlength="100" autocomplete="name" />
+          <span class="error-msg" id="nameError"></span>
+        </div>
 
-          <div class="form-group">
-            <label for="customerEmail">Email Address <span class="required">*</span></label>
-            <input
-              type="email"
-              id="customerEmail"
-              name="customerEmail"
-              placeholder="john@example.com"
-              required
-              autocomplete="email"
-            />
-            <span class="error-msg" id="emailError"></span>
-          </div>
+        <div class="form-group">
+          <label for="customerEmail">Email Address (Gmail) <span class="required">*</span></label>
+          <input type="email" id="customerEmail" name="customerEmail" placeholder="rahul@gmail.com" required autocomplete="email" />
+          <span class="error-msg" id="emailError"></span>
+        </div>
 
-          <div class="form-group">
-            <label for="customerPhone">Phone Number <span class="required">*</span></label>
-            <input
-              type="tel"
-              id="customerPhone"
-              name="customerPhone"
-              placeholder="+919876543210"
-              required
-              autocomplete="tel"
-            />
-            <span class="error-msg" id="phoneError"></span>
-          </div>
+        <div class="form-group">
+          <label for="customerPhone">Phone Number <span class="required">*</span></label>
+          <input type="tel" id="customerPhone" name="customerPhone" placeholder="+919876543210" required autocomplete="tel" />
+          <span class="error-msg" id="phoneError"></span>
+        </div>
 
-          <div class="form-group">
-            <label for="amount">Amount (INR) <span class="required">*</span></label>
-            <div class="input-prefix-wrap">
-              <span class="input-prefix">₹</span>
-              <input
-                type="number"
-                id="amount"
-                name="amount"
-                placeholder="500"
-                min="1"
-                step="0.01"
-                required
-              />
+        <!-- AMOUNT SELECTOR: only predefined options (200, 300, 400, 600) -->
+        <div class="form-group">
+          <label>Select Amount (INR) <span class="required">*</span></label>
+          <div class="amount-selector">
+            <div class="amount-options" id="amountOptions">
+              <label class="amount-option">
+                <input type="radio" name="amountRadio" value="200" checked> 
+                <span class="amount-card">₹ 200</span>
+              </label>
+              <label class="amount-option">
+                <input type="radio" name="amountRadio" value="300"> 
+                <span class="amount-card">₹ 300</span>
+              </label>
+              <label class="amount-option">
+                <input type="radio" name="amountRadio" value="400"> 
+                <span class="amount-card">₹ 400</span>
+              </label>
+              <label class="amount-option">
+                <input type="radio" name="amountRadio" value="600"> 
+                <span class="amount-card">₹ 600</span>
+              </label>
             </div>
-            <span class="error-msg" id="amountError"></span>
           </div>
+          <span class="error-msg" id="amountError"></span>
+        </div>
 
-          <div id="formError" class="alert alert-error hidden"></div>
+        <div id="formError" class="alert alert-error hidden"></div>
 
-          <button type="submit" id="submitBtn" class="btn btn-primary">
-            <span id="btnText">Proceed to Pay</span>
-            <span id="btnSpinner" class="spinner hidden"></span>
-          </button>
-        </form>
-      </section>
+        <button type="submit" id="submitBtn" class="btn btn-primary">
+          <span id="btnText">Pay Now</span>
+          <span id="btnSpinner" class="spinner hidden"></span>
+        </button>
+        <div class="badge-payment" style="text-align:center; margin-top:16px;">✅ UPI | Cards | NetBanking | Wallets</div>
+      </form>
+    </section>
 
-      <section class="card hidden" id="statusSection">
-        <h2>Payment Status</h2>
-        <div id="statusContent" class="status-content"></div>
-      </section>
-    </main>
+    <!-- Payment status section (shown after payment attempt) -->
+    <section class="card hidden" id="statusSection">
+      <h2>📋 Payment Status</h2>
+      <div id="statusContent" class="status-content"></div>
+      <button id="resetPaymentBtn" class="btn" style="background:#e9ecef; color:#1f3a4b; margin-top: 1rem;">➕ New Payment</button>
+    </section>
+  </main>
 
-    <footer class="page-footer">
-      <p>🔒 Your payment is secured by 256-bit SSL encryption</p>
-    </footer>
-  </div>
+  <footer class="page-footer">
+    <p>🔒 256-bit SSL encryption • Secure by Cashfree • Instant confirmation</p>
+  </footer>
+</div>
 
-  <script src="/js/payment.js"></script>
+<script>
+  // ============================================================
+  // CONFIGURATION: UPDATE WITH YOUR ACTUAL BACKEND URL
+  // GitHub repo: https://github.com/bhumialokeshh96-code/Payment-server-
+  // Expected endpoints: 
+  //    POST /api/create-order   -> returns { payment_session_id, order_id }
+  //    GET  /api/order-status?order_id=xxx (optional)
+  // ============================================================
+  const BACKEND_BASE_URL = 'https://your-backend-url.onrender.com';   // <-- REPLACE WITH YOUR LIVE BACKEND URL
+  // For local testing use: 'http://localhost:3000'
+  
+  const CREATE_ORDER_URL = `${BACKEND_BASE_URL}/api/create-order`;
+  const ORDER_STATUS_URL = `${BACKEND_BASE_URL}/api/order-status`;   // optional, but safe
+  
+  // Cashfree App ID (Client ID) - REPLACE WITH YOUR CASHFREE APP ID from dashboard
+  const CASHFREE_APP_ID = 'TEST1012345678901';    // <-- IMPORTANT: Replace with actual ID (starts with TEST or LIVE)
+  
+  let cashfree;
+  if (typeof Cashfree !== 'undefined') {
+    cashfree = new Cashfree(CASHFREE_APP_ID);
+  } else {
+    console.warn("Cashfree SDK not loaded. Ensure internet connection.");
+  }
+  
+  // DOM elements
+  const orderForm = document.getElementById('orderForm');
+  const submitBtn = document.getElementById('submitBtn');
+  const btnTextSpan = document.getElementById('btnText');
+  const btnSpinner = document.getElementById('btnSpinner');
+  const formErrorDiv = document.getElementById('formError');
+  const orderFormSection = document.getElementById('orderFormSection');
+  const statusSection = document.getElementById('statusSection');
+  const statusContent = document.getElementById('statusContent');
+  const resetBtn = document.getElementById('resetPaymentBtn');
+  
+  // Helper: get selected amount from radio buttons
+  function getSelectedAmount() {
+    const radioButtons = document.querySelectorAll('input[name="amountRadio"]');
+    for (let radio of radioButtons) {
+      if (radio.checked) {
+        return parseFloat(radio.value);
+      }
+    }
+    return 200; // fallback default
+  }
+  
+  function setLoading(isLoading) {
+    if (isLoading) {
+      btnTextSpan.classList.add('hidden');
+      btnSpinner.classList.remove('hidden');
+      submitBtn.disabled = true;
+    } else {
+      btnTextSpan.classList.remove('hidden');
+      btnSpinner.classList.add('hidden');
+      submitBtn.disabled = false;
+    }
+  }
+  
+  function showFormError(message) {
+    formErrorDiv.textContent = message;
+    formErrorDiv.classList.remove('hidden');
+    setTimeout(() => {
+      if (formErrorDiv) formErrorDiv.classList.add('hidden');
+    }, 5000);
+  }
+  
+  function clearFieldErrors() {
+    document.getElementById('nameError').innerText = '';
+    document.getElementById('emailError').innerText = '';
+    document.getElementById('phoneError').innerText = '';
+    document.getElementById('amountError').innerText = '';
+  }
+  
+  function validateForm(name, email, phone, amount) {
+    let isValid = true;
+    clearFieldErrors();
+    if (!name || name.trim().length < 2) {
+      document.getElementById('nameError').innerText = 'Enter valid full name (min 2 characters)';
+      isValid = false;
+    }
+    const emailRegex = /^[^\s@]+@([^\s@]+\.)+[^\s@]+$/;
+    if (!email || !emailRegex.test(email)) {
+      document.getElementById('emailError').innerText = 'Valid email required (example@gmail.com)';
+      isValid = false;
+    }
+    const phoneRegex = /^\+?[0-9]{10,15}$/;
+    let cleanPhone = phone.replace(/\s/g, '');
+    if (!cleanPhone.match(/^\+?[0-9]{10,15}$/)) {
+      document.getElementById('phoneError').innerText = 'Valid phone number with 10-15 digits';
+      isValid = false;
+    }
+    if (!amount || amount <= 0 || isNaN(amount)) {
+      document.getElementById('amountError').innerText = 'Please select a valid amount';
+      isValid = false;
+    } else if (![200, 300, 400, 600].includes(amount)) {
+      document.getElementById('amountError').innerText = 'Amount must be one of ₹200, ₹300, ₹400, ₹600';
+      isValid = false;
+    }
+    return isValid;
+  }
+  
+  // Create order via your backend
+  async function createPaymentOrder(payload) {
+    try {
+      const response = await fetch(CREATE_ORDER_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      if (!response.ok) {
+        let errorDetail = `HTTP ${response.status}`;
+        try {
+          const errData = await response.json();
+          errorDetail = errData.message || errData.error || errorDetail;
+        } catch(e) {}
+        throw new Error(`Server error: ${errorDetail}`);
+      }
+      const data = await response.json();
+      if (!data.payment_session_id) {
+        throw new Error('Invalid response from server: missing payment_session_id');
+      }
+      return data;
+    } catch (err) {
+      console.error('Create order API error:', err);
+      throw err;
+    }
+  }
+  
+  // Optional: fetch order status from backend
+  async function fetchOrderStatus(orderId) {
+    if (!ORDER_STATUS_URL) return null;
+    try {
+      const res = await fetch(`${ORDER_STATUS_URL}?order_id=${orderId}`);
+      if (res.ok) {
+        const statusData = await res.json();
+        return statusData;
+      }
+    } catch (err) {
+      console.warn("Status fetch failed", err);
+    }
+    return null;
+  }
+  
+  // Render status UI after payment return
+  function renderPaymentStatus(orderData, paymentSessionId) {
+    let statusHtml = `<div><strong>🆔 Order ID:</strong> ${orderData.order_id || 'N/A'}</div>`;
+    statusHtml += `<div><strong>💰 Amount:</strong> ₹${orderData.amount || '—'}</div>`;
+    statusHtml += `<div><strong>📧 Email:</strong> ${orderData.customer_email || '—'}</div>`;
+    statusHtml += `<div><strong>📞 Phone:</strong> ${orderData.customer_phone || '—'}</div>`;
+    statusHtml += `<div style="margin-top:12px;"><span class="badge-payment" style="background:#e0f2fe;">✅ Payment initiated via Cashfree</span></div>`;
+    statusHtml += `<div style="margin-top: 12px;"><small>🔁 Once payment is completed, Cashfree will process. Check your bank/UPI app for confirmation.</small></div>`;
+    if (paymentSessionId) {
+      statusHtml += `<div style="margin-top:10px; font-size:12px; background:#f0f4f9; padding:8px; border-radius:12px;">Session ID: ${paymentSessionId.substring(0,24)}...</div>`;
+    }
+    return statusHtml;
+  }
+  
+  // MAIN PAYMENT SUBMIT HANDLER
+  async function handlePaymentSubmit(event) {
+    event.preventDefault();
+    formErrorDiv.classList.add('hidden');
+    
+    const name = document.getElementById('customerName').value.trim();
+    const email = document.getElementById('customerEmail').value.trim();
+    let phone = document.getElementById('customerPhone').value.trim();
+    const amount = getSelectedAmount();   // only 200,300,400,600
+    
+    if (!validateForm(name, email, phone, amount)) return;
+    
+    // Format phone to international standard for Cashfree
+    let cleanPhone = phone.replace(/\D/g, '');
+    if (cleanPhone.length === 10) cleanPhone = `+91${cleanPhone}`;
+    else if (cleanPhone.length === 12 && cleanPhone.startsWith('91')) cleanPhone = `+${cleanPhone}`;
+    else if (!cleanPhone.startsWith('+')) cleanPhone = `+${cleanPhone}`;
+    
+    setLoading(true);
+    
+    const orderPayload = {
+      customer_name: name,
+      customer_email: email,
+      customer_phone: cleanPhone,
+      order_amount: amount,
+      order_currency: 'INR',
+      return_url: window.location.href,   // redirect back after payment
+    };
+    
+    try {
+      // Step 1: Create order on your backend (connects to Cashfree)
+      const orderResponse = await createPaymentOrder(orderPayload);
+      const { payment_session_id, order_id } = orderResponse;
+      
+      if (!payment_session_id) throw new Error('No payment session id');
+      
+      // Step 2: Initialize Cashfree checkout
+      if (!cashfree) {
+        throw new Error('Cashfree SDK missing. Please refresh or check App ID.');
+      }
+      
+      // Store order info in sessionStorage for after return
+      sessionStorage.setItem('lastOrder', JSON.stringify({
+        order_id: order_id,
+        amount: amount,
+        customer_email: email,
+        customer_phone: cleanPhone,
+        payment_session_id: payment_session_id,
+        timestamp: Date.now()
+      }));
+      
+      // Open Cashfree checkout modal/redirect
+      await cashfree.checkout({
+        paymentSessionId: payment_session_id,
+        returnUrl: window.location.origin + window.location.pathname + '?payment_status=return'
+      });
+      
+      // Note: The checkout redirects away, so code after this may not execute immediately.
+    } catch (err) {
+      console.error('Payment initiation error:', err);
+      showFormError(err.message || 'Unable to create order. Check backend or Cashfree keys.');
+      setLoading(false);
+    }
+  }
+  
+  // Function to check if returning from Cashfree and show status
+  async function checkForPaymentReturn() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const paymentReturn = urlParams.get('payment_status');
+    const orderIdParam = urlParams.get('order_id');
+    
+    const storedRaw = sessionStorage.getItem('lastOrder');
+    let lastOrderData = null;
+    if (storedRaw) {
+      try { lastOrderData = JSON.parse(storedRaw); } catch(e) {}
+    }
+    
+    / If return detected, show status section
+    if (paymentReturn === 'return' || orderIdParam || (lastOrderData && lastOrderData.order_id)) {
+      orderFormSection.classList.add('hidden');
+      statusSection.classList.remove('hidden');
+      
+      let displayOrderId = orderIdParam || (lastOrderData ? lastOrderData.order_id : 'N/A');
+      let displayAmount = lastOrderData ? lastOrderData.amount : '—';
+      let displayEmail = lastOrderData ? lastOrderData.customer_email : '—';
+      let displayPhone = lastOrderData ? lastOrderData.customer_phone : '—';
+      let sessionId = lastOrderData ? lastOrderData.payment_session_id : null;
+      
+      // Attempt to fetch latest status from backend if order_id exists
+      let extraStatusHtml = '';
+      if (displayOrderId && displayOrderId !== 'N/A') {
+        const serverStatus = await fetchOrderStatus(displayOrderId);
+        if (serverStatus && (serverStatus.payment_status || serverStatus.status)) {
+          const statusText = serverStatus.payment_status || serverStatus.status;
+          extraStatusHtml = `<div style="margin-top:12px; background:#dcfce7; padding:8px; border-radius:12px;"><strong>✅ Server Status:</strong> ${statusText.toUpperCase()}</div>`;
+        } else {
+          extraStatusHtml = `<div style="margin-top:12px; background:#fff3bf; padding:8px; border-radius:12px;">⏳ Payment is being processed. Please check your payment method or contact support with Order ID: ${displayOrderId}</div>`;
+        }
+      } else {
+        extraStatusHtml = `<div style="margin-top:12px;">💡 Your order is created. Payment status will update shortly in your Cashfree dashboard.</div>`;
+      }
+      
+      let finalHtml = `
+        <div><strong>🧾 Order Reference:</strong> ${displayOrderId}</div>
+        <div><strong>💵 Amount:</strong> ₹${displayAmount}</div>
+        <div><strong>📧 Email:</strong> ${displayEmail}</div>
+        <div><strong>📱 Mobile:</strong> ${displayPhone}</div>
+        ${sessionId ? `<div><strong>🔑 Session ID:</strong> ${sessionId.substring(0,24)}...</div>` : ''}
+        <hr style="margin: 12px 0;">
+        <div><strong>🔄 Payment flow:</strong> You have been redirected from Cashfree. If amount is deducted, settlement happens as per bank timelines.</div>
+        ${extraStatusHtml}
+        <div style="margin-top: 14px; font-size:0.75rem; background:#eef2ff; padding:8px; border-radius:12px;">📞 Need help? Share Order ID with support.</div>
+      `;
+      statusContent.innerHTML = finalHtml;
+      
+      // Clean URL parameters
+      if (window.history.replaceState) {
+        const cleanUrl = window.location.origin + window.location.pathname;
+        window.history.replaceState({}, document.title, cleanUrl);
+      }
+    } else {
+      // normal landing: show order form
+      orderFormSection.classList.remove('hidden');
+      statusSection.classList.add('hidden');
+      if (!paymentReturn && !orderIdParam) {
+        sessionStorage.removeItem('lastOrder');
+      }
+    }
+  }
+  
+  // Reset to order form (new payment)
+  function resetToOrderForm() {
+    orderFormSection.classList.remove('hidden');
+    statusSection.classList.add('hidden');
+    // Reset form fields but keep default amount selection (200 checked)
+    document.getElementById('customerName').value = '';
+    document.getElementById('customerEmail').value = '';
+    document.getElementById('customerPhone').value = '';
+    // set default radio 200 as checked
+    const radio200 = document.querySelector('input[name="amountRadio"][value="200"]');
+    if (radio200) radio200.checked = true;
+    clearFieldErrors();
+    formErrorDiv.classList.add('hidden');
+    sessionStorage.removeItem('lastOrder');
+  }
+  
+  // Event listeners
+  if (orderForm) orderForm.addEventListener('submit', handlePaymentSubmit);
+  if (resetBtn) resetBtn.addEventListener('click', resetToOrderForm);
+  
+  window.addEventListener('DOMContentLoaded', () => {
+    checkForPaymentReturn();
+    if (typeof Cashfree === 'undefined') {
+      console.warn('Cashfree SDK not loaded');
+      showFormError('Payment SDK unavailable. Please refresh or check network.');
+    } else {
+      if (!cashfree && typeof Cashfree !== 'undefined') {
+        try {
+          cashfree = new Cashfree(CASHFREE_APP_ID);
+        } catch(e) { console.error(e); }
+      }
+    }
+  });
+</script>
 </body>
 </html>
