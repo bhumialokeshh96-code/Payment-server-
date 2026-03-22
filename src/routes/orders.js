@@ -1,19 +1,8 @@
 const express = require('express');
 const router = express.Router();
-const { createOrder, getOrder } = require('../controllers/paymentController');
-const { validateCreateOrder, validateOrderId } = require('../middleware/validation');
-const { orderCreationLimiter, orderReadLimiter } = require('../middleware/rateLimiter');
+const { createOrder } = require('../controllers/orderController');
 
-/**
- * POST /api/orders
- * Create a new payment order.
- */
-router.post('/', orderCreationLimiter, validateCreateOrder, createOrder);
-
-/**
- * GET /api/orders/:orderId
- * Retrieve order details and current status.
- */
-router.get('/:orderId', orderReadLimiter, validateOrderId, getOrder);
+// POST /api/orders/create
+router.post('/create', createOrder);
 
 module.exports = router;
