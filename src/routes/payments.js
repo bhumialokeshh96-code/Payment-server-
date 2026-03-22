@@ -1,32 +1,48 @@
-const express = require('express');
-const router = express.Router();
-const { handleWebhook, verifyPayment } = require('../controllers/paymentController');
-const { webhookLimiter, verifyLimiter } = require('../middleware/rateLimiter');
-
-/**
- * POST /api/payments/webhook
- * Receive Cashfree webhook events. Uses raw body parsing for signature verification.
- */
-router.post(
-  '/webhook',
-  webhookLimiter,
-  express.raw({ type: 'application/json' }),
-  (req, res, next) => {
-    req.rawBody = req.body.toString('utf8');
-    try {
-      req.body = JSON.parse(req.rawBody);
-    } catch {
-      return res.status(400).json({ success: false, message: 'Invalid JSON payload' });
+// Remove name aur email validation, sirf phone aur amount
+document.getElementById('orderForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  
+  const phone = document.getElementById('customerPhone').value.trim();
+  const amount = document.getElementById('amount').value;
+  
+  // Sirf phone validation
+  if (!phone || phone.length < 10) {
+    showError('Please enter a valid 10-digit phone number');
+    return;
+  }
+  
+  if (!amount || amount <= 0) {
+    showError('Please enter a valid amount');
+    return;
+  }
+  
+  // Generate dummy name and email from phone number
+  const dummyName = `User_${phone.slice(-4)}`;
+  const dummyEmail = `${phone}@temp.com`;
+  
+  const orderData = {
+    customerName: dummyName,
+    customerEmail: dummyEmail,
+    customerPhone: phone,
+    amount: parseFloat(amount)
+  };
+  
+  // Rest of the code remains same...
+  try {
+    const response = await fetch('/api/create-order', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(orderData)
+    });
+    
+    const data = await response.json();
+    
+    if (data.success) {
+      initializePayment(data);
+    } else {
+      showError(data.message || 'Failed to create order');
     }
-    return next();
-  },
-  handleWebhook
-);
-
-/**
- * POST /api/payments/verify
- * Verify a payment by querying Cashfree for the latest order status.
- */
-router.post('/verify', verifyLimiter, verifyPayment);
-
-module.exports = router;
+  } catch (error) {
+    showError('Network error. Please try again.');
+  }
+});
