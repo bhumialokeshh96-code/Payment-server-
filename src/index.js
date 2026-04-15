@@ -17,7 +17,7 @@ const PORT = process.env.PORT || 3000;
 // ─── CORS ────────────────────────────────────────────────────────────────────
 const allowedOrigins = process.env.ALLOWED_ORIGINS
   ? process.env.ALLOWED_ORIGINS.split(',').map(origin => origin.trim())
-  : ['https://payment-server-1-yxf4.onrender.com'];
+  : ['https://payment-server-1-yf4.onrender.com'];
 
 app.use(
   cors({
