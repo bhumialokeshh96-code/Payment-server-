@@ -39,7 +39,7 @@ async function init() {
   }
 
   try {
-    // First verify payment status with backend
+    // ✅ First verify payment status with backend
     const verifyRes = await fetch('/api/payments/verify', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -50,12 +50,40 @@ async function init() {
     statusLoaderEl.classList.add('hidden');
 
     if (verifyRes.ok && verifyData.success) {
+      // ✅ अगर payment FAILED या CANCELLED है, तो cancel.html पर redirect करो
+      if (
+        verifyData.data.status === 'FAILED' || 
+        verifyData.data.status === 'USER_DROPPED' ||
+        verifyData.data.status === 'CANCELLED'
+      ) {
+        console.log('Payment cancelled/failed, redirecting to cancel page...');
+        window.location.href = `/cancel.html?order_id=${orderId}`;
+        return;
+      }
+
+      // ✅ अगर payment PAID है, तो success details दिखाओ
+      if (verifyData.data.status === 'PAID') {
+        renderOrderDetails(verifyData.data);
+        return;
+      }
+
+      // ✅ अगर कोई और status है, तो उसे भी दिखाओ
       renderOrderDetails(verifyData.data);
     } else {
       // Fallback: just fetch order details
       const orderRes = await fetch(`/api/orders/${orderId}`);
       const orderData = await orderRes.json();
       if (orderRes.ok && orderData.success) {
+        // ✅ Fallback में भी status check करो
+        if (
+          orderData.data.status === 'FAILED' || 
+          orderData.data.status === 'USER_DROPPED' ||
+          orderData.data.status === 'CANCELLED'
+        ) {
+          console.log('Payment cancelled/failed (fallback), redirecting to cancel page...');
+          window.location.href = `/cancel.html?order_id=${orderId}`;
+          return;
+        }
         renderOrderDetails(orderData.data);
       } else {
         orderDetailsEl.innerHTML = `<p style="color:#e53e3e">${escapeHtml(orderData.message || 'Unable to load order details.')}</p>`;
