@@ -16,8 +16,10 @@ const createOrder = async (req, res, next) => {
     const orderId = generateId('order');
     const customerId = generateId('cust');
 
-    const returnUrl =
-      process.env.PAYMENT_SUCCESS_URL || `${process.env.APP_BASE_URL || 'http://localhost:3000'}/success.html`;
+    // ✅ Success और Cancel URLs को अलग-अलग set करें
+    const baseUrl = process.env.APP_BASE_URL || 'http://localhost:3000';
+    const successUrl = process.env.PAYMENT_SUCCESS_URL || `${baseUrl}/success.html`;
+    const cancelUrl = process.env.PAYMENT_CANCEL_URL || `${baseUrl}/cancel.html`;
 
     const cashfreePayload = {
       order_id: orderId,
@@ -30,7 +32,9 @@ const createOrder = async (req, res, next) => {
         customer_phone: customerPhone,
       },
       order_meta: {
-        return_url: `${returnUrl}?order_id=${orderId}`,
+        return_url: `${successUrl}?order_id=${orderId}`,
+        // ✅ Cancel URL को भी add करें - Cashfree यहाँ redirect करेगा जब user cancel करे
+        notify_url: `${cancelUrl}?order_id=${orderId}`,
       },
     };
 
@@ -61,6 +65,7 @@ const createOrder = async (req, res, next) => {
       paymentSessionId: cashfreeResponse.payment_session_id,
       orderMeta: {
         returnUrl: cashfreePayload.order_meta.return_url,
+        cancelUrl: cashfreePayload.order_meta.notify_url,
       },
     });
 
@@ -234,6 +239,8 @@ const verifyPayment = async (req, res, next) => {
     if (cfStatus === 'PAID') newStatus = ORDER_STATUS.PAID;
     else if (cfStatus === 'EXPIRED') newStatus = ORDER_STATUS.EXPIRED;
     else if (cfStatus === 'ACTIVE') newStatus = ORDER_STATUS.CREATED;
+    // ✅ Cancelled status को भी handle करें
+    else if (cfStatus === 'CANCELLED') newStatus = ORDER_STATUS.FAILED;
 
     if (newStatus !== order.status) {
       order.status = newStatus;
