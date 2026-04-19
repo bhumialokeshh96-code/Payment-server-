@@ -16,6 +16,16 @@ const customerDetailsSchema = new mongoose.Schema(
   { _id: false }
 );
 
+// ✅ orderMeta schema ko properly define करो
+const orderMetaSchema = new mongoose.Schema(
+  {
+    returnUrl: { type: String, default: null },
+    cancelUrl: { type: String, default: null },  // ✅ Cancel URL को store करो
+    successUrl: { type: String, default: null }, // ✅ Success URL को भी store करो
+  },
+  { _id: false }
+);
+
 const orderSchema = new mongoose.Schema(
   {
     orderId: {
@@ -46,9 +56,13 @@ const orderSchema = new mongoose.Schema(
       type: customerDetailsSchema,
       required: true,
     },
-    cashfreeOrderId: { type: String, default: null },
+    cashfreeOrderId: { type: String, default: null, index: true },  // ✅ Index add करो query के लिए
     paymentSessionId: { type: String, default: null },
-    orderMeta: { type: mongoose.Schema.Types.Mixed, default: {} },
+    // ✅ orderMeta को properly structure करो
+    orderMeta: {
+      type: orderMetaSchema,
+      default: {},
+    },
   },
   {
     timestamps: true,
